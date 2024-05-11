@@ -1,31 +1,75 @@
 const express = require('express');
-
-const { Genre } = require('../db');
+const { Copy } = require('../db');
 
 function create(req, res, next){
-    res.send('Copies  create');
+    const number = req.body.number;
+    const format = req.body.format;
+    const movieId = req.body.movieId;
+    const status = req.body.status;
+
+    Copy.create({
+        number: number,
+        format: format,
+        movieId: movieId,
+        status: status
+    }).then(object => res.json(object))
+    .catch(err => res.send(err));
 }
 
 function list(req, res, next) {
-    Genre.findAll()
+    Copy.findAll()
     .then(objects => res.json(objects))
-    .catch();
+    .catch(err => res.send(err));
 }
 
 function index(req, res, next){
-    res.send(`Copies => index => ${req.params.id}`);
+    const id = req.params.id;
+    Copy.findByPk(id)
+        .then(object => res.json(object))
+        .catch(err => res.send(err));
 }
 
 function replace(req, res, next){
-    res.send(`Copies => replace => ${req.params.id}`);
+    const id = req.params.id;
+    Copy.findByPk(id)
+    .then(object => {
+        const number = req.body.number ? req.body.number : "";
+        const format = req.body.format ? req.body.format : "";
+        const movieId = req.body.movieId ? req.body.movieId : "";
+        const status = req.body.status ? req.body.status : "";
+        object.update({
+            number: number,
+            format: format,
+            movieId: movieId,
+            status: status
+        }).then(obj => res.json(obj))
+        .catch(err => res.send(err));
+    }).catch(err => res.send(err));
 }
 
 function update(req, res, next){
-    res.send(`Copies => update => ${req.params.id}`);
+    const id = req.params.id;
+    Copy.findByPk(id)
+    .then(object => {
+        const number = req.body.number ? req.body.number : object.number;
+        const format = req.body.format ? req.body.format : object.format;
+        const movieId = req.body.movieId ? req.body.movieId : object.movieId;
+        const status = req.body.status ? req.body.status : object.status;
+        object.update({
+            number: number,
+            format: format,
+            movieId: movieId,
+            status: status
+        }).then(obj => res.json(obj))
+        .catch(err => res.send(err));
+    }).catch(err => res.send(err));
 }
 
 function destroy(req, res, next){
-    res.send(`Copies => destroy => ${req.params.id}`);
+    const id = req.params.id;
+    Copy.destroy({where:{id:id}})
+    .then(object => res.json(object))
+    .catch(err => res.send(err));
 }
 
 module.exports = { create, list, index, replace, update, destroy};
