@@ -3,11 +3,31 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const mongoose = require('mongoose');
+const { expressjwt } = require('express-jwt')
+
+const jwtKey = "b76a26fb781e4177f17ef433c9330d8b";
+
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const directorsRouter = require('./routes/directors');
+
 const app = express();
+
+// Estrucutura para conectarse a una base de datos de Mongo db
+//mongodb://<dbUser>?:<dbPass>?@<url>:<port>/<dbName>
+const url = "mongodb://localhost:27017/video-club";
+mongoose.connect(url);
+
+const db = mongoose.connection;
+db.on('open', ()=>{
+  console.log("Conexión a la base de datos correcta");
+});
+
+db.on('error', ()=>{
+  console.log("No se pudo conectar a la base de datos");
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -18,6 +38,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(expressjwt({secret: jwtKey, algorithms: ['HS256']}).unless({path:["/login"]}));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
